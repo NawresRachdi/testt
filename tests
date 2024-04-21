@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Tests\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+class PieceControllerTest extends WebTestCase
+{
+    public function testList()
+    {
+        $client = static::createClient();
+
+        $client->getRequest('GET', '/api/pieces');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJson($client->getResponse()->getContent());
+    }
+
+    public function testGetPieceDetails()
+    {
+        $client = static::createClient();
+
+        $client->getRequest('GET', '/api/pieces/1');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJson($client->getResponse()->getContent());
+    }
+
+    public function testCreatePiece()
+    {
+        $client = static::createClient();
+
+        $client->getRequest(
+            'POST',
+            '/api/pieces',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'nom' => 'Test Piece',
+                'qualite' => 'High',
+                'reference' => 'REF123',
+                'quantite' => 10,
+                'prix' => 50.99
+            ])
+        );
+
+        $this->assertSame(201, $client->getResponse()->getStatusCode());
+    }
+
+    public function testModifyData()
+    {
+        $client = static::createClient();
+
+        $client->getRequest(
+            'PUT',
+            '/api/pieces/1',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'nom' => 'Updated Piece Name',
+                'qualite' => 'Updated Quality',
+                'reference' => 'REF456',
+                'quantite' => 20,
+                'prix' => 60.99
+            ])
+        );
+
+        $this->assertResponseIsSuccessful();
+    }
+
+    public function testDeletePiece()
+    {
+        $client = static::createClient();
+
+        $client->getRequest('DELETE', '/api/pieces/1');
+
+        $this->assertSame(204, $client->getResponse()->getStatusCode());
+    }
+
+    public function testSearchPieceByNom()
+    {
+        $client = static::createClient();
+
+        $client->getRequest('GET', '/api/pieces/search/Test');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertJson($client->getResponse()->getContent());
+    }
+}
